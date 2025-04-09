@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,7 @@ namespace PokemonCardCollector.Controllers
             if (ModelState.IsValid)
             {
                 var email = User.FindFirstValue(ClaimTypes.Email);
-                pokemonCard.UserEmail = email ?? "None"; // Set the UserEmail property to our logged-in user's email
+                pokemonCard.UserEmail = email ?? "Guest"; // Set the UserEmail property to our logged-in user's email
 
                 _context.Add(pokemonCard);
                 await _context.SaveChangesAsync();
@@ -70,11 +71,18 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: PokemonCards/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
+            }
+            // Check if our current user is the creator
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (pokemonCard.UserEmail != currentEmail)
+            {
+                return Forbid(); // Returns 403 Forbidden
             }
 
             var pokemonCard = await _context.PokemonCard.FindAsync(id);
@@ -90,7 +98,8 @@ namespace PokemonCardCollector.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,SetName,SetNumber,Type,Price,IsOwned,IsWanted,UserEmail")] PokemonCard pokemonCard)
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,SetName,SetNumber,Type,Price,IsOwned,IsWanted")] PokemonCard pokemonCard)
         {
             if (id != pokemonCard.Id)
             {
@@ -101,6 +110,21 @@ namespace PokemonCardCollector.Controllers
             {
                 try
                 {
+                    // re-fetch our original card to compare email before updating
+                    var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+                    var existingCard = await _context.PokemonCard.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+                    if (existingCard == null)
+                    {
+                        return NotFound();
+                    }
+                    if (existingCard.UserEmail != currentEmail)
+                    {
+                        return Forbid();
+                    }
+
+                    // making sure UserEmail is preserved
+                    pokemonCard.UserEmail = existingCard.UserEmail;
+
                     _context.Update(pokemonCard);
                     await _context.SaveChangesAsync();
                 }
@@ -121,6 +145,7 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: PokemonCards/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,6 +159,12 @@ namespace PokemonCardCollector.Controllers
             {
                 return NotFound();
             }
+            // Check if our current user is the creator
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (pokemonCard.UserEmail != currentEmail)
+            {
+                return Forbid();
+            }
 
             return View(pokemonCard);
         }
@@ -141,14 +172,18 @@ namespace PokemonCardCollector.Controllers
         // POST: PokemonCards/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var pokemonCard = await _context.PokemonCard.FindAsync(id);
-            if (pokemonCard != null)
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+
+            if (pokemonCard == null || pokemonCard.UserEmail != currentEmail)
             {
-                _context.PokemonCard.Remove(pokemonCard);
+                return Forbid();
             }
 
+            _context.PokemonCard.Remove(pokemonCard);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

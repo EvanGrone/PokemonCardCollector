@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,7 @@ namespace PokemonCardCollector.Controllers
             if (ModelState.IsValid)
             {
                 var email = User.FindFirstValue(ClaimTypes.Email);
-                collection.UserEmail = email ?? "None"; // Set the UserEmail property to our logged-in user's email
+                collection.UserEmail = email ?? "Guest"; // Set the UserEmail property to our logged-in user's email
                 _context.Add(collection);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -69,11 +70,18 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: Collections/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
+            }
+
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (collection.UserEmail != currentEmail)
+            {
+                return Forbid(); // Returns 403 Forbidden
             }
 
             var collection = await _context.Collection.FindAsync(id);
@@ -89,7 +97,8 @@ namespace PokemonCardCollector.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreatedDate,UserEmail")] Collection collection)
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreatedDate")] Collection collection)
         {
             if (id != collection.Id)
             {
@@ -100,6 +109,21 @@ namespace PokemonCardCollector.Controllers
             {
                 try
                 {
+                    // re-fetch our original card to compare email before updating
+                    var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+                    var existingCollection = await _context.Collection.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+                    if (existingCollection == null)
+                    {
+                        return NotFound();
+                    }
+                    if (existingCollection.UserEmail != currentEmail)
+                    {
+                        return Forbid();
+                    }
+
+                    // making sure UserEmail is preserved
+                    collection.UserEmail = existingCollection.UserEmail;
+
                     _context.Update(collection);
                     await _context.SaveChangesAsync();
                 }
@@ -120,6 +144,7 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: Collections/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,20 +159,31 @@ namespace PokemonCardCollector.Controllers
                 return NotFound();
             }
 
+            // Check if our current user is the creator
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (collection.UserEmail != currentEmail)
+            {
+                return Forbid();
+            }
+
             return View(collection);
         }
 
         // POST: Collections/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var collection = await _context.Collection.FindAsync(id);
-            if (collection != null)
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+
+            if (collection == null || collection.UserEmail != currentEmail)
             {
-                _context.Collection.Remove(collection);
+                return Forbid();
             }
 
+            _context.Collection.Remove(collection);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
