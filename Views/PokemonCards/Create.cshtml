@@ -4,9 +4,9 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<h1>Create New Card</h1>
 
-<h4>PokemonCard</h4>
+<h4>Pokemon Card</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -46,11 +46,6 @@
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="IsWanted" /> @Html.DisplayNameFor(model => model.IsWanted)
                 </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="UserEmail" class="control-label"></label>
-                <input asp-for="UserEmail" class="form-control" />
-                <span asp-validation-for="UserEmail" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

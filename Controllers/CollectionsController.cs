@@ -46,22 +46,22 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: Collections/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Collections/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CreatedDate")] Collection collection)
         {
             if (ModelState.IsValid)
             {
                 var email = User.FindFirstValue(ClaimTypes.Email);
-                collection.UserEmail = email ?? "Guest"; // Set the UserEmail property to our logged-in user's email
+                collection.UserEmail = email;
                 _context.Add(collection);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -79,12 +79,13 @@ namespace PokemonCardCollector.Controllers
             }
 
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            var collection = await _context.Collection.FindAsync(id);
             if (collection.UserEmail != currentEmail)
             {
                 return Forbid(); // Returns 403 Forbidden
             }
 
-            var collection = await _context.Collection.FindAsync(id);
+       
             if (collection == null)
             {
                 return NotFound();

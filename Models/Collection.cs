@@ -19,7 +19,7 @@ namespace PokemonCardCollector.Models
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         // Foreign key to the user
-        public string UserEmail { get; set; }
+        public string? UserEmail { get; set; }
         public List<PokemonCard> Cards { get; set; }
     }
 }

@@ -26,6 +26,6 @@ namespace PokemonCardCollector.Models
         public bool IsWanted { get; set; }
 
         // Add this to associate cards with users email 
-        public string UserEmail { get; set; }
+        public string? UserEmail { get; set; }
     }
 }

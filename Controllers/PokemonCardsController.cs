@@ -46,22 +46,25 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: PokemonCards/Create
+        [Authorize] // Add this to ensure user is logged in
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: PokemonCards/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize] // Add this to ensure user is logged in
         public async Task<IActionResult> Create([Bind("Id,Name,SetName,SetNumber,Type,Price,IsOwned,IsWanted")] PokemonCard pokemonCard)
         {
             if (ModelState.IsValid)
             {
+                // Get the currently logged in user's email
                 var email = User.FindFirstValue(ClaimTypes.Email);
-                pokemonCard.UserEmail = email ?? "Guest"; // Set the UserEmail property to our logged-in user's email
+
+                // Set the UserEmail properly - no "Guest" option if the method is protected by [Authorize]
+                pokemonCard.UserEmail = email;
 
                 _context.Add(pokemonCard);
                 await _context.SaveChangesAsync();
@@ -80,12 +83,13 @@ namespace PokemonCardCollector.Controllers
             }
             // Check if our current user is the creator
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            var pokemonCard = await _context.PokemonCard.FindAsync(id);
             if (pokemonCard.UserEmail != currentEmail)
             {
                 return Forbid(); // Returns 403 Forbidden
             }
 
-            var pokemonCard = await _context.PokemonCard.FindAsync(id);
+        
             if (pokemonCard == null)
             {
                 return NotFound();
