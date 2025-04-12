@@ -5,6 +5,10 @@ body {
     padding: 0;
 }
 
+.pokemon-font {
+    font-family: 'Pokemon Solid', sans-serif;
+}
+
 .container {
     width: 90%;
     max-width: 1000px;
@@ -15,12 +19,12 @@ body {
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
-h1, h2 {
-    color: #333;
-    border-bottom: 2px solid #eee;
+/*h1, h2 {
+    color: black;
+    border-bottom: 2px solid;
     padding-bottom: 8px;
 }
-
+*/
 table {
     width: 100%;
     border-collapse: collapse;
@@ -39,6 +43,8 @@ th, td {
 th {
     background-color: #f4f4f4;
 }
+
+
 
 a.button, input[type="submit"] {
     display: inline-block;
