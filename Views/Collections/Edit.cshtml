@@ -1,44 +1,62 @@
 ﻿@model PokemonCardCollector.Models.Collection
-
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Collection";
 }
 
-<h1>Edit Your Collection</h1>
-
-<h4>Collection</h4>
+<h1 class="pokemon-font">Edit Collection</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form id="collectionForm" asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+
+            <input type="hidden" id="userEmail" name="userEmail" value="@ViewBag.UserEmail" />
+
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+                <label asp-for="Name" class="control-label bubble"></label>
+                <input asp-for="Name" class="form-control bubble" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
+                <label asp-for="Description" class="control-label bubble"></label>
+                <input asp-for="Description" class="form-control bubble" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="CreatedDate" class="control-label"></label>
-                <input asp-for="CreatedDate" class="form-control" />
-                <span asp-validation-for="CreatedDate" class="text-danger"></span>
+                <input type="hidden" asp-for="CreatedDate" />
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <!-- for slecting multiple cards for from pokemon cards -->
+            <div class="form-group mt-3">
+                <label class="control-label bubble">Cards in Collection</label>
+                <select name="SelectedCards" class="form-control bubble" multiple>
+                    @foreach (var card in ViewBag.UserCards)
+                    {
+                        <option value="@card.Value" selected="@card.Selected">@card.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Save" class="btn btn-primary pokemon-font" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a class="pokemon-font" asp-action="Index">Back to Collections</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const userEmail = document.getElementById('userEmail').value;
+
+    </script>
 }

@@ -4,21 +4,21 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Your Collections</h1>
+<h1 class="pokemon-font">Collections</h1>
 
 <p>
-    <a asp-action="Create">Create A New Collection</a>
+    <a class="pokemon-font" asp-action="Create">Create A New Collection</a>
 </p>
 <table class="table">
     <thead>
         <tr>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.CreatedDate)
             </th>
         </tr>
@@ -26,19 +26,19 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
+            <td class="bubble">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
+            <td class="bubble">
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
-            <td>
+            <td class="bubble">
                 @Html.DisplayFor(modelItem => item.CreatedDate)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="pokemon-font" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a class="pokemon-font" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a class="pokemon-font" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
 }

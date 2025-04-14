@@ -1,14 +1,43 @@
+/* Set my background to be a blue color to make white table pop more*/
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9f9f9;
+    background-color: dodgerblue;
     margin: 0;
     padding: 0;
 }
 
+/* Give a white background, some rounded corners, padding, and some shadowing to the wrapper that holds all the content
+*/
+main {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    padding-bottom: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* have tables and forms white background */
+.table, .form-control {
+    background-color: white;
+}
+
+/* custom pokemon font I imported*/
 .pokemon-font {
     font-family: 'Pokemon Solid', sans-serif;
 }
 
+/*custom bubble font that matches pokemon font, since pokemon font was hard to read inside the tables and forms*/
+.bubble {
+    font-family: 'Bubblegum Sans';
+}
+
+/* I want to keep the navbar white to pop against the blue background */
+.navbar {
+    background-color: white !important;
+}
+
+/* standard .NET container css*/
 .container {
     width: 90%;
     max-width: 1000px;
@@ -19,38 +48,36 @@ body {
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
-/*h1, h2 {
-    color: black;
-    border-bottom: 2px solid;
-    padding-bottom: 8px;
-}
-*/
+/* make table full width and collapse borders*/
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
 
+/* give table light gray border */
 table, th, td {
     border: 1px solid #ddd;
 }
 
+/* align text and give padding */
 th, td {
     padding: 12px;
     text-align: left;
 }
 
+/* header will have a light grey background*/
 th {
     background-color: #f4f4f4;
 }
 
 
-
+/* styles buttons to be green with white text, and become a lighter green when hovered over*/
 a.button, input[type="submit"] {
     display: inline-block;
     padding: 8px 16px;
     margin: 5px 0;
-    background-color: #4CAF50;
+    background-color: darkolivegreen;
     color: white;
     text-decoration: none;
     border-radius: 4px;
@@ -59,9 +86,15 @@ a.button, input[type="submit"] {
 }
 
     a.button:hover, input[type="submit"]:hover {
-        background-color: #45a049;
+        background-color: lawngreen;
     }
 
+/* spacing for form */
 form {
     margin-top: 20px;
+}
+
+/*  bootstraps primary button color now blue to match my background*/
+btn btn-primary{
+    color: dodgerblue;
 }

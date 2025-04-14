@@ -25,6 +25,7 @@ namespace PokemonCardCollector.Models
         [Display(Name = "On My Wishlist")]
         public bool IsWanted { get; set; }
 
+        public int? CollectionId { get; set; }
         // Add this to associate cards with users email 
         public string? UserEmail { get; set; }
     }

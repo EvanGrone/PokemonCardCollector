@@ -36,6 +36,7 @@ namespace PokemonCardCollector.Controllers
             }
 
             var collection = await _context.Collection
+                .Include(c => c.Cards) // include the cards in the collection
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (collection == null)
             {
@@ -49,6 +50,18 @@ namespace PokemonCardCollector.Controllers
         [Authorize]
         public IActionResult Create()
         {
+            //In ASP.NET MVC, ViewBag is a dynamic property of the ControllerBase class, used to pass data from the controller to the view.
+            //It functions as a wrapper around the ViewData object, providing a more concise syntax for accessing data in views.
+            //ViewBag allows you to dynamically add properties, set values, and retrieve them from the view using the same names, without requiring explicit type definitions
+            // get our currently logged in user's email
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+            // pass the email to the view
+            ViewBag.UserEmail = userEmail;
+
+            // grab user's cards to populate the multi-select box 
+            ViewBag.UserCards = new MultiSelectList(_context.PokemonCard.Where(c => c.UserEmail == userEmail), "Id", "Name");
+
             return View();
         }
 
@@ -56,16 +69,39 @@ namespace PokemonCardCollector.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,CreatedDate")] Collection collection)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description")] Collection collection, int[] SelectedCards)
         {
             if (ModelState.IsValid)
             {
                 var email = User.FindFirstValue(ClaimTypes.Email);
                 collection.UserEmail = email;
+                collection.CreatedDate = DateTime.Now;
+
                 _context.Add(collection);
                 await _context.SaveChangesAsync();
+
+                // add our selected cards to the collection
+                if (SelectedCards != null && SelectedCards.Length > 0)
+                {
+                    foreach (var cardId in SelectedCards)
+                    {
+                        var card = await _context.PokemonCard.FindAsync(cardId);
+                        if (card != null && card.UserEmail == email)
+                        {
+                            collection.Cards.Add(card);
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
+
+            // if we get here, something failed, redisplay our form
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            ViewBag.UserEmail = userEmail;
+            ViewBag.UserCards = new MultiSelectList(_context.PokemonCard.Where(c => c.UserEmail == userEmail), "Id", "Name");
+
             return View(collection);
         }
 
@@ -79,27 +115,37 @@ namespace PokemonCardCollector.Controllers
             }
 
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
-            var collection = await _context.Collection.FindAsync(id);
+            var collection = await _context.Collection
+                .Include(c => c.Cards)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (collection == null)
+            {
+                return NotFound();
+            }
+
             if (collection.UserEmail != currentEmail)
             {
                 return Forbid(); // Returns 403 Forbidden
             }
 
-       
-            if (collection == null)
-            {
-                return NotFound();
-            }
+            // grab all the user’s cards for the multi-select, and check which ones are already in this collection
+            var userCards = await _context.PokemonCard
+                .Where(c => c.UserEmail == currentEmail)
+                .ToListAsync();
+
+            ViewBag.UserEmail = currentEmail;
+            ViewBag.UserCards = new MultiSelectList(userCards, "Id", "Name",
+                collection.Cards.Select(c => c.Id));
+
             return View(collection);
         }
 
         // POST: Collections/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreatedDate")] Collection collection)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreatedDate")] Collection collection, int[] SelectedCards)
         {
             if (id != collection.Id)
             {
@@ -110,9 +156,13 @@ namespace PokemonCardCollector.Controllers
             {
                 try
                 {
-                    // re-fetch our original card to compare email before updating
+                    // check if the user is owner of the collection 
                     var currentEmail = User.FindFirstValue(ClaimTypes.Email);
-                    var existingCollection = await _context.Collection.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+                    var existingCollection = await _context.Collection
+                        .Include(c => c.Cards)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(c => c.Id == id);
+
                     if (existingCollection == null)
                     {
                         return NotFound();
@@ -122,10 +172,31 @@ namespace PokemonCardCollector.Controllers
                         return Forbid();
                     }
 
-                    // making sure UserEmail is preserved
+                    // keep the original email for the collection
                     collection.UserEmail = existingCollection.UserEmail;
 
                     _context.Update(collection);
+
+                    // update the cards in collection
+                    var collectionToUpdate = await _context.Collection
+                        .Include(c => c.Cards)
+                        .FirstOrDefaultAsync(c => c.Id == id);
+
+                    collectionToUpdate.Cards.Clear();
+
+                    // add the selected cards that are owned by logged in user 
+                    if (SelectedCards != null)
+                    {
+                        foreach (var cardId in SelectedCards)
+                        {
+                            var card = await _context.PokemonCard.FindAsync(cardId);
+                            if (card != null && card.UserEmail == currentEmail)
+                            {
+                                collectionToUpdate.Cards.Add(card);
+                            }
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -141,6 +212,12 @@ namespace PokemonCardCollector.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            // if we get here, something failed, redisplay our form
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            ViewBag.UserEmail = userEmail;
+            ViewBag.UserCards = new MultiSelectList(_context.PokemonCard.Where(c => c.UserEmail == userEmail), "Id", "Name");
+
             return View(collection);
         }
 
@@ -176,19 +253,35 @@ namespace PokemonCardCollector.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var collection = await _context.Collection.FindAsync(id);
+            var collection = await _context.Collection
+                .Include(c => c.Cards)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
 
+
+            // make sure collection belongs to logged in user
             if (collection == null || collection.UserEmail != currentEmail)
             {
                 return Forbid();
             }
 
+            // remove the relationship between cards and this collection as to not delete the card 
+            foreach (var card in collection.Cards.ToList())
+            {
+                collection.Cards.Remove(card);
+            }
+
+            // save the changes to remove relationships
+            await _context.SaveChangesAsync();
+
+            // delete the collection 
             _context.Collection.Remove(collection);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
-
+        // .NET hekoer function to check for collections
         private bool CollectionExists(int id)
         {
             return _context.Collection.Any(e => e.Id == id);

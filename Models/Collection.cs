@@ -20,6 +20,6 @@ namespace PokemonCardCollector.Models
 
         // Foreign key to the user
         public string? UserEmail { get; set; }
-        public List<PokemonCard> Cards { get; set; }
+        public List<PokemonCard> Cards { get; set; } = new List<PokemonCard>();
     }
 }

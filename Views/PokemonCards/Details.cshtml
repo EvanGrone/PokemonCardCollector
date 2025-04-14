@@ -4,57 +4,56 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1 class="pokemon-font">Details</h1>
 
 <div>
-    <h4>PokemonCard</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.SetName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.SetName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.SetNumber)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.SetNumber)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.Type)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.Type)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 buble">
             @Html.DisplayNameFor(model => model.Price)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.Price)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.IsOwned)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.IsOwned)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.IsWanted)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class = "col-sm-10 bubble">
             @Html.DisplayFor(model => model.IsWanted)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a class="pokemon-font" asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a class="pokemon-font" asp-action="Index">Back to Cards</a>
 </div>

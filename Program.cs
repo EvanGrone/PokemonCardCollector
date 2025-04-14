@@ -5,13 +5,14 @@ using PokemonCardCollector.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+// Default .NET builder code for server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>(); // this line is to allow users to login to non-authenticated accounts for rubric purposes
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

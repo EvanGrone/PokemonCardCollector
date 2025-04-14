@@ -1,8 +1,15 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Welcome to your Pokemon Card Collector";
 }
-
 <div class="text-center">
     <h1 class="pokemon-font">Save your card collecting progress and see which cards you still need!</h1>
+
+    <div class="mt-4">
+        <a asp-controller="PokemonCards" asp-action="Index" class="btn btn-primary btn-lg m-2 pokemon-font">
+            View Pokemon Cards
+        </a>
+        <a asp-controller="Collections" asp-action="Index" class="btn btn-primary btn-lg m-2 pokemon-font">
+            View Collections
+        </a>
+    </div>
 </div>

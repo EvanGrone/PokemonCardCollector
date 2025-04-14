@@ -1,36 +1,64 @@
 ﻿@model PokemonCardCollector.Models.Collection
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Collection Details";
 }
 
-<h1>Details</h1>
+<h1 class="pokemon-font">@Model.Name</h1>
 
 <div>
-    <h4>Collection</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 bubble">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 bubble">
             @Html.DisplayFor(model => model.Description)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2 bubble">
             @Html.DisplayNameFor(model => model.CreatedDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10 bubble">
             @Html.DisplayFor(model => model.CreatedDate)
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<h3 class="mt-4 pokemon-font">Cards in Collection</h3>
+
+@if (Model.Cards != null && Model.Cards.Any())
+{
+    <div class="row">
+        @foreach (var card in Model.Cards)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title bubble">@card.Name</h5>
+                        <p class="card-text bubble">Set: @card.SetName #@card.SetNumber</p>
+                        <p class="card-text bubble">Type: @card.Type</p>
+                        @if (card.Price.HasValue)
+                        {
+                            <p class="card-text bubble">Price: @card.Price.Value.ToString("C")</p>
+                        }
+                        <a asp-controller="PokemonCards" asp-action="Details" asp-route-id="@card.Id" class="btn btn-primary pokemon-font">View Card</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="bubble">No cards in this collection yet.</p>
+}
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary pokemon-font">Edit</a> |
+    <a asp-action="Index" class="pokemon-font">Back to Collections</a>
 </div>

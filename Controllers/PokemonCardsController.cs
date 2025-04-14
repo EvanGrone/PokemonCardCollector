@@ -35,7 +35,7 @@ namespace PokemonCardCollector.Controllers
                 return NotFound();
             }
 
-            var pokemonCard = await _context.PokemonCard
+            var pokemonCard = await _context.PokemonCard // get the card details from the database that match the card id to what is in database
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (pokemonCard == null)
             {
@@ -46,7 +46,7 @@ namespace PokemonCardCollector.Controllers
         }
 
         // GET: PokemonCards/Create
-        [Authorize] // Add this to ensure user is logged in
+        [Authorize] // Authorize is .NET way of making sure the user is logged in and not a guest 
         public IActionResult Create()
         {
             return View();
@@ -55,22 +55,23 @@ namespace PokemonCardCollector.Controllers
         // POST: PokemonCards/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize] // Add this to ensure user is logged in
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Id,Name,SetName,SetNumber,Type,Price,IsOwned,IsWanted")] PokemonCard pokemonCard)
         {
             if (ModelState.IsValid)
             {
-                // Get the currently logged in user's email
+                // grab the currently logged in user's email
                 var email = User.FindFirstValue(ClaimTypes.Email);
 
-                // Set the UserEmail properly - no "Guest" option if the method is protected by [Authorize]
+                // attach the current user email to the card so user doesn't have to input it when creating card
                 pokemonCard.UserEmail = email;
 
+                // save the created card to the database
                 _context.Add(pokemonCard);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); // go back to the list of cards which is index page
             }
-            return View(pokemonCard);
+            return View(pokemonCard); // if validation fails anywhere (controller or js) then just resubmit the view of a blank form
         }
 
         // GET: PokemonCards/Edit/5
@@ -81,10 +82,13 @@ namespace PokemonCardCollector.Controllers
             {
                 return NotFound();
             }
-            // Check if our current user is the creator
+            // check if our current user is the creator by grabbing thier email
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+
+            // get the card from the database
             var pokemonCard = await _context.PokemonCard.FindAsync(id);
-            if (pokemonCard.UserEmail != currentEmail)
+
+            if (pokemonCard.UserEmail != currentEmail) // forbids the user from editing the card if their email is not same on card when created
             {
                 return Forbid(); // Returns 403 Forbidden
             }
@@ -94,7 +98,7 @@ namespace PokemonCardCollector.Controllers
             {
                 return NotFound();
             }
-            return View(pokemonCard);
+            return View(pokemonCard); // after done editing show the edit form with updated values 
         }
 
         // POST: PokemonCards/Edit/5
@@ -115,23 +119,28 @@ namespace PokemonCardCollector.Controllers
                 try
                 {
                     // re-fetch our original card to compare email before updating
-                    var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+                    var currentEmail = User.FindFirstValue(ClaimTypes.Email); // make sure cuurent user is owner of card 
+
+                    // get the card from the database matching making sure ids match
                     var existingCard = await _context.PokemonCard.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+
                     if (existingCard == null)
                     {
-                        return NotFound();
+                        return NotFound(); // original card wasnt found in db
                     }
                     if (existingCard.UserEmail != currentEmail)
                     {
-                        return Forbid();
+                        return Forbid(); // requested card to edit had mismatch emails
                     }
 
-                    // making sure UserEmail is preserved
+                    // making sure UserEmail is preserved and not lost 
                     pokemonCard.UserEmail = existingCard.UserEmail;
 
+                    // update teh database with edited card
                     _context.Update(pokemonCard);
                     await _context.SaveChangesAsync();
                 }
+                // database excpetions from .NET
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!PokemonCardExists(pokemonCard.Id))
@@ -145,7 +154,7 @@ namespace PokemonCardCollector.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(pokemonCard);
+            return View(pokemonCard); // validation failed at some point, reload the edit form
         }
 
         // GET: PokemonCards/Delete/5
@@ -157,20 +166,21 @@ namespace PokemonCardCollector.Controllers
                 return NotFound();
             }
 
+            // get card from database
             var pokemonCard = await _context.PokemonCard
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (pokemonCard == null)
             {
                 return NotFound();
             }
-            // Check if our current user is the creator
+            // check if our current user is the creator since only they can delete it 
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
             if (pokemonCard.UserEmail != currentEmail)
             {
                 return Forbid();
             }
 
-            return View(pokemonCard);
+            return View(pokemonCard); // show page asking for confirmation of deletion
         }
 
         // POST: PokemonCards/Delete/5
@@ -179,19 +189,21 @@ namespace PokemonCardCollector.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // get card from db, and get current user email
             var pokemonCard = await _context.PokemonCard.FindAsync(id);
             var currentEmail = User.FindFirstValue(ClaimTypes.Email);
 
-            if (pokemonCard == null || pokemonCard.UserEmail != currentEmail)
+            if (pokemonCard == null || pokemonCard.UserEmail != currentEmail) // if current user is not creator of card forbid it
             {
                 return Forbid();
             }
 
+            // update the database to remove the card 
             _context.PokemonCard.Remove(pokemonCard);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
+        // .NET helper function to see if card exists by matching ids
         private bool PokemonCardExists(int id)
         {
             return _context.PokemonCard.Any(e => e.Id == id);

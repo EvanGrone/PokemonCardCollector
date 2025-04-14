@@ -4,33 +4,33 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Your Pokemon Cards</h1>
+<h1 class="pokemon-font">Your Pokemon Cards</h1>
 
 <p>
-    <a asp-action="Create">Create A New Pokemon Card!</a>
+    <a class="pokemon-font" asp-action="Create">Create a New Pokemon Card!</a>
 </p>
 <table class="table">
     <thead>
         <tr>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.SetName)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.SetNumber)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.Type)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.Price)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.IsOwned)
             </th>
-            <th>
+            <th class="bubble">
                 @Html.DisplayNameFor(model => model.IsWanted)
             </th>
         </tr>
@@ -38,31 +38,31 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
+            <td class="bubble">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
+                <td class="bubble">
                 @Html.DisplayFor(modelItem => item.SetName)
             </td>
-            <td>
+                <td class="bubble">
                 @Html.DisplayFor(modelItem => item.SetNumber)
             </td>
-            <td>
+                <td class="bubble">
                 @Html.DisplayFor(modelItem => item.Type)
             </td>
-            <td>
+                <td class="bubble">
                 @Html.DisplayFor(modelItem => item.Price)
             </td>
-            <td>
+                <td class="bubble">
                 @Html.DisplayFor(modelItem => item.IsOwned)
             </td>
-            <td>
+                <td class="bubble">
                 @Html.DisplayFor(modelItem => item.IsWanted)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="pokemon-font" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a class="pokemon-font"  asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a class="pokemon-font"  asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
 }
