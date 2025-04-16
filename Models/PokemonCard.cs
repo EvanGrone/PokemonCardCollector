@@ -12,6 +12,7 @@ namespace PokemonCardCollector.Models
 
         [Display(Name = "Set Name")]
         public string SetName { get; set; } // which set the card is from 
+        [Display(Name = "Set Number")]
         public int SetNumber { get; set; } // card number in the set
         public string Type { get; set; } // fire, water, fighting, etc 
 
